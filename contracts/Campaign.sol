@@ -73,8 +73,13 @@ contract Campaign is Context {
      * @notice Some methods can be invoked only by the agency that produces the fundraising campaign instance.
      */
 
-    modifier onlyAgency() {
+    modifier onlyAgencyOwner() {
         require( _msgSender() == _agency.owner(), "Campaign: caller is not the agency owner" );
+        _;
+    }
+
+    modifier onlyAgency() {
+        require( _msgSender() == address(_agency), "Campaign: caller is not the agency owner" );
         _;
     }
 
@@ -206,7 +211,7 @@ contract Campaign is Context {
      * @param newDetails A structure with the details of this campaign.
      */
 
-    function updateDetails( CampaignDetails memory newDetails) public onlyAgency {
+    function updateDetails( CampaignDetails memory newDetails) public onlyAgencyOwner {
         if( newDetails.id != _details.id ) {
             revert CampaignMismatchError(_details.id, newDetails.id );
         }
@@ -234,12 +239,13 @@ contract Campaign is Context {
      * @param don -- A donation structure where the identifier shall be a valid identifier
      */
 
-    function registerDonation( Donation memory don ) public onlyAgency {
+
+    function registerDonation( Donation memory don ) public onlyAgencyOwner {
         if( isArchived() ) {
             revert Agency.AlreadyArchivedCampaignError(_details.id);
         }
         DonationHandle i = handleDonation(don.id);
-        if( _donations[i].length > 0 ) {
+        if(  _donations[i].length > 0 ) {
             revert DonationAlreadyExistsError(don.id);
         }
         _donations[i].push(don);
@@ -262,7 +268,7 @@ contract Campaign is Context {
      * @return update -- If succeeded, the method returns the progressive number assigned to this update.
      */
 
-    function updateDonation( Donation memory don ) public onlyAgency returns(uint16 update) {
+    function updateDonation( Donation memory don ) public onlyAgencyOwner returns(uint16 update) {
         DonationHandle i = handleDonation(don.id);
         uint n = _donations[i].length;
         if( n == 0 ) {

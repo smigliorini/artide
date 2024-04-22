@@ -130,7 +130,6 @@ contract Agency is Ownable {
     constructor(){
     }
 
-
     /**
      * @notice The method create a new campaign instance starting from the details specified as argument. The campaign
      * identifier attribute shall be a new unique identifier among the ones stored in the blockchain by this agency that
@@ -236,9 +235,11 @@ contract Agency is Ownable {
         _updateIndexEnabled = true;
         uint i = r.index();
         _active[i].updateIndex( NOT_INDEXED );
+
         if( !preserveOrdering ) {
             _active[i] = _active[_active.length - 1];
             _active[i].updateIndex( i );
+
         } else {
             for( uint j = i; j < _active.length - 1; j++ ) {
                 _active[j] = _active[j + 1];
